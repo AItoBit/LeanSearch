@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install elan
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Build Lean REPL
+        run: |
+          git clone --depth 1 --branch v4.34.0 https://github.com/leanprover-community/repl vendor/repl
+          cd vendor/repl && lake build
+
+      - name: Install package
+        run: pip install -e ".[dev]"
+
+      - name: Unit + integration tests
+        run: pytest -q
+
+      - name: Benchmark files compile with reference proofs
+        run: python scripts/check_benchmarks.py benchmarks/mini
+
+      - name: Regression proof suite
+        run: leansearch eval benchmarks/mini --search best_first -k 10 --max-nodes 50 --max-lean-calls 400 --out reports/ci

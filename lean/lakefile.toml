@@ -1,0 +1,24 @@
+name = "LeanSearchProblems"
+defaultTargets = ["LeanSearchProblems"]
+
+# Mathlib-backed Lean project for LeanSearch. The REPL is a dependency so
+# `lean --run` / the repl binary can see both REPL and Mathlib modules.
+#
+#   cd lean
+#   lake exe cache get     # download prebuilt Mathlib oleans (~5 GB)
+#   lake build
+#
+# Then pass `--project lean` (or set LEANSEARCH_LEAN_PROJECT=lean).
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4"
+rev = "v4.34.0"
+
+[[require]]
+name = "REPL"
+git = "https://github.com/leanprover-community/repl"
+rev = "v4.34.0"
+
+[[lean_lib]]
+name = "LeanSearchProblems"
